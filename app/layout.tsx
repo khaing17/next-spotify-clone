@@ -6,7 +6,7 @@ import SideBar from '@/components/SideBar'
 const font = Figtree({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Spotify - Web Player: Music for everyone',
+  title: 'Music Dev - Play it everywhere!',
   description: 'Music is everything!',
 }
 
