@@ -1,12 +1,12 @@
 import { User } from "@supabase/auth-helpers-nextjs"
 import { useSessionContext, useUser as useSupaUser } from "@supabase/auth-helpers-react"
-import { createContext, useEffect, useState } from "react"
+import { createContext, useContext, useEffect, useState } from "react"
 
 import { Subscription, UserDetails } from "@/types/type"
 
 
 type UserContextType = {
-    accessToken: string | null,
+    accessToken: string | null | undefined,
     user: User | null,
     userDetails: UserDetails | null,
     isLoading: boolean,
@@ -33,4 +33,48 @@ export const MyUserContextProvider = (props: Props) => {
     const getUserDetails = supabase.from("users").select("*").single()
     const getSubscription = supabase.from("subscriptions").select("* , price(*,product(*))").in("status", ["trialing", "active"]).single()
 
+    useEffect(() => {
+        if (user && !isLoadingData && !userDetails && !subscription) {
+            setIsLoadingData(true)
+            Promise.allSettled([getUserDetails, getSubscription]).then(
+                (results) => {
+                    const userDetailsPromise = results[0]
+                    const subscriptionPromise = results[1]
+                    if (userDetailsPromise.status === "fulfilled") {
+                        setUserDetails(userDetailsPromise.value.data as UserDetails)
+                    }
+                    if (subscriptionPromise.status === "fulfilled") {
+                        setSubscription(subscriptionPromise.value.data as Subscription)
+                    }
+                    setIsLoadingData(false)
+                }
+            )
+        }
+        else if (!user && !isLoadingUser && !isLoadingData) {
+            setUserDetails(null)
+            setSubscription(null)
+            setIsLoadingData(false)
+        }
+    }, [user, isLoadingUser])
+
+    const value = {
+        accessToken,
+        user,
+        userDetails,
+        isLoading: isLoadingUser || isLoadingData,
+        subscription,
+    }
+
+    return <UserContext.Provider value={value} {...props} />
+}
+
+
+export const useUser = () => {
+    const context = useContext(UserContext)
+
+    if (context === undefined) {
+        throw new Error("useUser must be used within a UserContextProvider")
+    }
+
+    return context
 }
