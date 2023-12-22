@@ -4,7 +4,7 @@ import './globals.css'
 import SideBar from '@/components/SideBar'
 import SupabaseProvider from '@/providers/SupabaseProvider'
 import ModalProvider from '@/providers/ModalProvider'
-import UserProvider from '@/providers/userProvider'
+import UserProvider from '@/providers/UserProvider'
 
 const font = Figtree({ subsets: ['latin'] })
 
